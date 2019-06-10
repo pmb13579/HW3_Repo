@@ -29,9 +29,10 @@ with open(csvpath, newline='') as csvfile:
    csv_header = next(csvreader)
    print(f"CSV Header: {csv_header}")
 
-   # initialize variable
+   # initialize variables
    count = 0
    tot_by_cand = dict()  
+   tot_by_cand_cty = dict()  
 
    # Read each row of data after the header
    for row in csvreader:
@@ -40,7 +41,15 @@ with open(csvpath, newline='') as csvfile:
       # calculations for esvh row
       count += 1
       cand = row[2]
+
+      # extra - create second dictionary
       tot_by_cand[cand] = tot_by_cand.get(cand,0) + 1
+
+      # extra - also summarize in dictionasry
+      # with 2-tuple candidate-county key 
+      county = row[1]
+      myKey = (cand, county)
+      tot_by_cand_cty[myKey] = tot_by_cand_cty.get(myKey,0) + 1
 
 # create list with lines of output 
 candList = list(tot_by_cand.keys())
@@ -72,10 +81,27 @@ outputFile = open("output.txt","w")
 for out in output:
    outputFile.write(out + "\n")
 
-# (possible bonus)
-# also summarize in dictionary
-#  with county-candidate key,
-#  using a tuple key
-#  then, export this dictionary as csv file
-#  imput into Excel
-#  create pivot tables and charts
+# extra - print second dictionary
+print(tot_by_cand_cty)
+
+# rest of code below is extra
+
+# output csv file with second dictionary
+listKeys = list(tot_by_cand_cty.keys())
+
+# Specify the file to write to
+output_path = os.path.join("outputExtra.csv")
+
+# Open the file using "write" mode. Specify the variable to hold the contents
+with open(output_path, 'w', newline='') as csvfile:
+
+   # Initialize csv.writer
+   csvwriter = csv.writer(csvfile, delimiter=',')
+
+   # Write the first row (column headers)
+   csvwriter.writerow(["candidate","county","votes"])
+
+   # Write the second row
+   for key in listKeys:
+      csvwriter.writerow([key[0], key[1],
+      tot_by_cand_cty[key]])
